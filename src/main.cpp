@@ -58,10 +58,11 @@ int main(){
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
     while(LL_APB1_GRP1_IsEnabledClock(LL_APB1_GRP1_PERIPH_SPI2) != 1);
     //настраиваем все пины для управления экраном 
-    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_6, LL_GPIO_MODE_OUTPUT);
-    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_6, LL_GPIO_OUTPUT_PUSHPULL);
-    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_6, LL_GPIO_SPEED_FREQ_VERY_HIGH);
-    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_6, LL_GPIO_PULL_DOWN);
+    // не используеться в виду отсутсвия транзистора 
+    /*LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_8, LL_GPIO_MODE_OUTPUT);
+    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_8, LL_GPIO_OUTPUT_PUSHPULL);
+    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_8, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_8, LL_GPIO_PULL_DOWN);*/
     //-----------------------
     LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_10, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinOutputType(GPIOB, LL_GPIO_PIN_10, LL_GPIO_OUTPUT_PUSHPULL);
@@ -109,7 +110,89 @@ int main(){
     LL_SPI_SetNSSMode(SPI2, LL_SPI_NSS_SOFT);
     LL_SPI_Enable(SPI2);
     while(true){
-
-    }
-    //LL_SPI_TransmitData8();
+        uint16_t color = 0xF800;
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_12);
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_11);
+        //----------------
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_10);//команда на формат цвета
+        LL_SPI_TransmitData8(SPI2, 0x11);
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        for(volatile uint32_t i = 0; i< 17000000; i++){
+            __NOP();
+        }
+        LL_SPI_TransmitData8(SPI2, 0x29);
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //------------------------
+        while (!LL_SPI_IsActiveFlag_TXE(SPI2));
+        LL_SPI_TransmitData8(SPI2, 0x2A);// команда на задание размера по X
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_10);
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x7F);// данные о конце кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_10);
+        LL_SPI_TransmitData8(SPI2, 0x2B);// команда на задание размера по Y 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_10);
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x00);// данные о начале кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_SPI_TransmitData8(SPI2, 0x9F);// данные о конце кординат 
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_10);//команда на формат цвета
+        LL_SPI_TransmitData8(SPI2, 0x3A);
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_10);//данные о том какой форамат 
+        LL_SPI_TransmitData8(SPI2, 0x05);
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_10);//команда на передачу данных о цвете 
+        LL_SPI_TransmitData8(SPI2, 0x2C);
+        while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+        while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        //----------------
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_10);//данные цвета каждого пикселя 
+        for(volatile uint16_t i = 0; i< 20480; i++){
+            LL_SPI_TransmitData8(SPI2, color >> 8);
+            while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+            while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+            //----------------
+            LL_SPI_TransmitData8(SPI2, color && 0xFF);
+            while (LL_SPI_IsActiveFlag_TXE(SPI2) == 0);
+            while (LL_SPI_IsActiveFlag_BSY(SPI2) == 1);
+        }
+    }   
 }
